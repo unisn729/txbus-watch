@@ -1,0 +1,4 @@
+config.json
+watch.log
+__pycache__/
+*.pyc

@@ -1,0 +1,38 @@
+name: 시외버스 좌석 감시
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"   # 10분마다 (GitHub는 UTC 기준, 부하에 따라 몇 분 밀릴 수 있음)
+  workflow_dispatch: {}       # Actions 탭에서 수동 실행 버튼
+
+permissions:
+  contents: write            # state.json 을 커밋하기 위함
+
+concurrency:
+  group: txbus-watch
+  cancel-in-progress: false  # 겹쳐 도는 대신 줄 세운다 (state.json 충돌 방지)
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 노선 설정 반영 (routes만, 비밀번호는 여기 없음)
+        run: cp config.ci.json config.json
+
+      - name: 조회 및 필요시 메일 발송
+        env:
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          GMAIL_TO: ${{ secrets.GMAIL_TO }}
+        run: python3 watch.py check
+
+      - name: 상태 저장 커밋 (60일 넘게 커밋이 없으면 GitHub가 스케줄을 자동으로 꺼버리므로 매번 커밋)
+        run: |
+          git config user.name "txbus-watch bot"
+          git config user.email "actions@users.noreply.github.com"
+          date -u +%Y-%m-%dT%H:%M:%SZ > .last_checked
+          git add state.json .last_checked
+          git commit -m "checked $(date -u +%Y-%m-%dT%H:%M:%SZ)" --quiet || true
+          git push

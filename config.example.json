@@ -1,0 +1,19 @@
+{
+  "routes": [
+    {
+      "name": "동서울→춘천",
+      "depr_cd": "0511601",
+      "arvl_cd": "2443501",
+      "dates": ["2026-09-12", "2026-09-13"],
+      "time_from": "00:00",
+      "time_to": "23:59",
+      "min_seats": 1
+    }
+  ],
+  "gmail": {
+    "user": "보내는주소@gmail.com",
+    "app_password": "abcd efgh ijkl mnop",
+    "to": "받는주소@gmail.com"
+  },
+  "notify_macos": true
+}
