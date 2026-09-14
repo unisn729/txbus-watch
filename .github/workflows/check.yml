@@ -2,7 +2,7 @@ name: 시외버스 좌석 감시
 
 on:
   schedule:
-    - cron: "*/10 * * * *"   # 10분마다 (GitHub는 UTC 기준, 부하에 따라 몇 분 밀릴 수 있음)
+    - cron: "*/5 * * * *"    # 5분마다 (GitHub는 UTC 기준, 부하에 따라 몇 분 밀릴 수 있음)
   workflow_dispatch: {}       # Actions 탭에서 수동 실행 버튼
 
 permissions:
