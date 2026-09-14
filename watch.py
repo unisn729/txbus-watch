@@ -272,7 +272,19 @@ def cmd_check(args):
     found = []          # 이번에 새로 좌석이 생긴 편
     new_state = {}
 
-    opener = make_opener()
+    opener = None
+    for attempt in range(3):
+        try:
+            opener = make_opener()
+            break
+        except Exception as e:
+            log("세션 생성 실패 (%d/3): %s" % (attempt + 1, e))
+            if attempt < 2:
+                time.sleep(10)
+    if opener is None:
+        log("세션 생성에 계속 실패하여 이번 실행은 건너뜁니다.")
+        return 0
+
     for route in cfg["routes"]:
         min_seats = int(route.get("min_seats", 1))
         t_from = route.get("time_from", "00:00")
@@ -284,12 +296,16 @@ def cmd_check(args):
             try:
                 buses = fetch_route(opener, route["depr_cd"], route["arvl_cd"], date)
             except Exception as e:
-                log("조회 실패 %s %s: %s" % (route.get("name", ""), date, e))
-                # 조회에 실패한 날짜의 이전 상태는 그대로 유지한다.
-                for k, v in state.items():
-                    if k.startswith("%s|%s|" % (route.get("name", ""), date)):
-                        new_state[k] = v
-                continue
+                time.sleep(5)
+                try:
+                    buses = fetch_route(opener, route["depr_cd"], route["arvl_cd"], date)
+                except Exception:
+                    log("조회 실패 %s %s: %s" % (route.get("name", ""), date, e))
+                    # 조회에 실패한 날짜의 이전 상태는 그대로 유지한다.
+                    for k, v in state.items():
+                        if k.startswith("%s|%s|" % (route.get("name", ""), date)):
+                            new_state[k] = v
+                    continue
 
             for b in buses:
                 if not (t_from <= b["depart"] <= t_to):
