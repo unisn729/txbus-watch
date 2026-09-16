@@ -5,7 +5,7 @@
       "depr_cd": "5325101",
       "arvl_cd": "0671801",
       "dates": ["2026-09-26"],
-      "time_from": "00:00",
+      "time_from": "10:00",
       "time_to": "23:59",
       "min_seats": 1
     }
